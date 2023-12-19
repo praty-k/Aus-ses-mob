@@ -43,13 +43,13 @@ The folder "Mobility_aggregation_by_destination" contains aggregate DZN pass thr
 The final plots are produced by the file "Validation_pathzz_vicroads.py"
 
 GEOCODING example
-Consider the intersection of `Tesla Road` and `Edison Street' which is close to the `Musk Dungeon' (these roads and locations do not exist in Melbourne), the description in the DoT dataset could be any of the following:
+Consider the intersection of `Tesla Road` and `Edison Street` which is close to the `Musk Dungeon` (these roads and locations do not exist in Melbourne), the description in the DoT dataset could be any of the following:
 
- TESLA RD NR EDISON ST NR MUSK DGN
- TESLA RD / EDISON ST NR MUSK DGN
- TESLA RD NR EDISON ST (MUSK DGN)
+ `TESLA RD NR EDISON ST NR MUSK DGN`
+ `TESLA RD / EDISON ST NR MUSK DGN`
+ `TESLA RD NR EDISON ST (MUSK DGN)`
 
-We use the strings `NR' and `/' as separators, remove the string in brackets and remove the strings like `RD', `ST', `LN' or `PL' etc. Now we are left with `TESLA' and `EDISON', which can be used to search intersections with the same string in the `name' fields produced by OSM geocoding.
+We use the strings `NR` and `/` as separators, remove the string in brackets and remove the strings like `RD`, `ST`, `LN` or `PL` etc. Now we are left with `TESLA` and `EDISON`, which can be used to search intersections with the same string in the `name` fields produced by OSM geocoding.
 
 
 
