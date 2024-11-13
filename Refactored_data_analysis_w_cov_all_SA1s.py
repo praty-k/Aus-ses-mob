@@ -11,14 +11,14 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import pandas as pd
 import seaborn as sns
-import pymannkendall as mk
+#import pymannkendall as mk
 import os
 
 #%% Importing functions
 from dataframe_prep_w_cov_all_SA1s import dataframe_prep
 from draw_lplot import draw_lplot
 from draw_jplot import draw_scatter, draw_hex
-from ER_EO_heatmap import compute_heatmap, draw_heatmap, draw_heatmap_zero_centre
+from ER_EO_heatmap import compute_heatmap_pop, compute_heatmap, draw_heatmap_pop, draw_heatmap, draw_heatmap_zero_centre
 from mono_test import mono_test_mk, mono_test_spearman
 from corr import spearman_corr, linear_regression
 
@@ -33,6 +33,7 @@ plt.rcParams['font.family'] = 'Arial'
 plt.rcParams['mathtext.fontset'] = 'cm'
 plt.rcParams['font.size'] = 12
 plt.rc('axes', titlesize=plt.rcParams['font.size'])
+plt.rc('axes', axisbelow=True)
 #%% Plotting symbols
 lm = '$\lambda_{\mathrm{mob}}$'
 lc = '$\lambda_{\mathrm{cov}}$'
@@ -47,7 +48,7 @@ df_syd = pd.read_csv('SYD__seifa_all_filter.csv', na_values='-',
                      usecols=['SA1', 'ER_score', 'EO_score', 'URP', 'apr20base_count', 'apr20wave_count', 'jan22base_count', 'jan22wave_count'])
 
 #%% HEx plot bw ER and EO score
-fig, ax = plt.subplots(1, 2, figsize = (12*0.4*2.1, 12*0.4))
+fig, ax = plt.subplots(1, 2, figsize = (12*0.4*2.1, 12*0.4), sharex = True, sharey = True)
 cmap = mcolors.ListedColormap(sns.color_palette("Blues",256))
 cmap.set_under('lightgrey') 
 df_mel.plot(kind='hexbin', x = 'EO_score', y = 'ER_score', gridsize = 35, ax = ax[0], cmap = cmap, vmin = 1)
@@ -61,7 +62,7 @@ ax[1].set_ylabel('ER Score')
 ax[0].set_title('Melbourne')
 ax[1].set_title('Sydney')
 plt.tight_layout()
-fig.savefig('ER-EO-Histogram.pdf')
+fig.savefig('ER-EO-Histogram-a.pdf')
 
 #%% Coverage: Read in daily coverage values for SA1s, join with df_mel and df_syd, 
 ### compute v = no of daily trips / daily coverage  for all time periods
@@ -136,6 +137,10 @@ f.savefig('Refactored_code_plots_cov_all_SA1s/Mel-Jan2022-hmap.pdf')
 SA1_hist_mel = compute_heatmap(df_mel.ER_local_decile.values, df_mel.EO_local_decile.values, qty = 'histogram')
 f = draw_heatmap(SA1_hist_mel, fname = fname, title = 'Counts of SA1s in Melbourne', fmt = '0.0f')
 f.savefig('Refactored_code_plots_cov_all_SA1s/Mel-SA1s-hmap.pdf')
+SA1_hist_mel_pop = compute_heatmap_pop(df_mel.ER_local_decile.values, df_mel.EO_local_decile.values, df_mel.URP)
+f = draw_heatmap_pop(SA1_hist_mel_pop, fname = fname, title = 'Population counts in Melbourne', fmt = '1.1e')
+f.savefig('Refactored_code_plots_cov_all_SA1s/Mel-pop-hmap.pdf')
+
 #%% Heatmaps Sydney
 fname = 'Syd-'
 hdata = compute_heatmap(df_syd.ER_local_decile.values, df_syd.EO_local_decile.values, df_syd.apr20_log_ratio_mob.values, 10)
@@ -147,6 +152,9 @@ f.savefig('Refactored_code_plots_cov_all_SA1s/Syd-Jan22-hmap.pdf')
 SA1_hist_syd = compute_heatmap(df_syd.ER_local_decile.values, df_syd.EO_local_decile.values, qty = 'histogram')
 f = draw_heatmap(SA1_hist_syd, fname = fname, title = 'Counts of SA1s in Sydney', fmt = '0.0f')
 f.savefig('Refactored_code_plots_cov_all_SA1s/Syd-SA1s-hmap.pdf')
+SA1_hist_syd_pop = compute_heatmap_pop(df_syd.ER_local_decile.values, df_syd.EO_local_decile.values, df_syd.URP)
+f = draw_heatmap_pop(SA1_hist_syd_pop, fname = fname, title = 'Population counts in Sydney', fmt = '1.1e')
+f.savefig('Refactored_code_plots_cov_all_SA1s/Syd-pop-hmap.pdf')
 
 #%% Line plots
 fig, axs = plt.subplots(2, 2, figsize = (4*2, 4*2), sharey=True, sharex=True, constrained_layout = True)
@@ -168,6 +176,67 @@ draw_lplot(axs[1, 1], df_syd.ER_local_decile.values, df_syd[Y], xlabel = 'Local 
 handles, legend_labels = axs[1, 1].get_legend_handles_labels()
 fig.legend(handles, legend_labels, loc = 'outside upper right', ncols = 3, fancybox = False)
 fig.savefig('Refactored_code_plots_cov_all_SA1s/Jan22-lplot.pdf')
+
+
+#%% Boxen plots
+from draw_univariate_plots import draw_vplot, draw_boxenplot
+
+
+# fig, axs = plt.subplots(2, 2, figsize = (4*2, 4*2), sharey=True, sharex=True, constrained_layout = True)
+# Y = 'apr20_log_ratio_mob'
+# draw_vplot(axs[0, 0], x = 'EO_local_decile', y=Y, df=df_mel, xlabel = 'Local decile of EO', ylabel = f'{lm}', title = 'Melbourne - April 2020', subplotlabel = 'A')
+# draw_vplot(axs[0, 1], x = 'EO_local_decile', y=Y, df = df_syd, xlabel = 'Local decile of EO', ylabel = f'{lm}', title = 'Sydney - April 2020', subplotlabel = 'B')
+# draw_vplot(axs[1, 0], x = 'ER_local_decile', y=Y, df = df_mel, xlabel = 'Local decile of ER', ylabel = f'{lm}', title = 'Melbourne - April 2020', subplotlabel = 'C')
+# draw_vplot(axs[1, 1], x = 'ER_local_decile', y=Y, df = df_syd, xlabel = 'Local decile of ER', ylabel = f'{lm}', title = 'Sydney - April 2020', subplotlabel = 'D')
+# axs[0, 0].set_ylim(-4.5, 3)
+
+
+fig, axs = plt.subplots(2, 2, figsize = (4*2, 4*2), sharey=True, constrained_layout = True)
+Y = 'apr20_log_ratio_mob'
+draw_boxenplot(axs[0, 0], x = 'EO_local_decile', y=Y, df=df_mel, xlabel = 'Local decile of EO', ylabel = f'{lm}', title = 'Melbourne - April 2020', subplotlabel = 'A')
+draw_boxenplot(axs[0, 1], x = 'EO_local_decile', y=Y, df = df_syd, xlabel = 'Local decile of EO', ylabel = f'{lm}', title = 'Sydney - April 2020', subplotlabel = 'B')
+draw_boxenplot(axs[1, 0], x = 'ER_local_decile', y=Y, df = df_mel, xlabel = 'Local decile of ER', ylabel = f'{lm}', title = 'Melbourne - April 2020', subplotlabel = 'C')
+draw_boxenplot(axs[1, 1], x = 'ER_local_decile', y=Y, df = df_syd, xlabel = 'Local decile of ER', ylabel = f'{lm}', title = 'Sydney - April 2020', subplotlabel = 'D')
+axs[0, 0].set_ylim(-4.5, 3)
+#fig.savefig('Refactored_code_plots_cov_all_SA1s/Apr20-boxenplot_w_l.pdf')
+#plt.close()
+
+fig, axs = plt.subplots(2, 2, figsize = (4*2, 4*2), sharey=True, constrained_layout = True)
+Y = 'jan22_log_ratio_mob'
+draw_boxenplot(axs[0, 0], x = 'EO_local_decile', y=Y, df=df_mel, xlabel = 'Local decile of EO', ylabel = f'{lm}', title = 'Melbourne - Jan 2022', subplotlabel = 'A')
+draw_boxenplot(axs[0, 1], x = 'EO_local_decile', y=Y, df = df_syd, xlabel = 'Local decile of EO', ylabel = f'{lm}', title = 'Sydney - Jan 2022', subplotlabel = 'B')
+draw_boxenplot(axs[1, 0], x = 'ER_local_decile', y=Y, df = df_mel, xlabel = 'Local decile of ER', ylabel = f'{lm}', title = 'Melbourne - Jan 2022', subplotlabel = 'C')
+draw_boxenplot(axs[1, 1], x = 'ER_local_decile', y=Y, df = df_syd, xlabel = 'Local decile of ER', ylabel = f'{lm}', title = 'Sydney - Jan 2022', subplotlabel = 'D')
+handles, legend_labels = axs[1, 1].get_legend_handles_labels()
+
+axs[0, 0].set_ylim(-1.75, 1.75)
+fig.savefig('Refactored_code_plots_cov_all_SA1s/Jan22-boxenplot_w_l.pdf')
+plt.close()
+
+
+fig, axs = plt.subplots(2, 2, figsize = (4*2, 4*2), sharey=True, constrained_layout = True)
+Y = 'apr20_log_ratio_mob'
+draw_vplot(axs[0, 0], x = 'EO_local_decile', y=Y, df=df_mel, xlabel = 'Local decile of EO', ylabel = f'{lm}', title = 'Melbourne - April 2020', subplotlabel = 'A')
+draw_vplot(axs[0, 1], x = 'EO_local_decile', y=Y, df = df_syd, xlabel = 'Local decile of EO', ylabel = f'{lm}', title = 'Sydney - April 2020', subplotlabel = 'B')
+draw_vplot(axs[1, 0], x = 'ER_local_decile', y=Y, df = df_mel, xlabel = 'Local decile of ER', ylabel = f'{lm}', title = 'Melbourne - April 2020', subplotlabel = 'C')
+draw_vplot(axs[1, 1], x = 'ER_local_decile', y=Y, df = df_syd, xlabel = 'Local decile of ER', ylabel = f'{lm}', title = 'Sydney - April 2020', subplotlabel = 'D')
+axs[0, 0].set_ylim(-4.5, 3)
+fig.savefig('Refactored_code_plots_cov_all_SA1s/Apr20-violinplot.pdf')
+plt.close()
+
+fig, axs = plt.subplots(2, 2, figsize = (4*2, 4*2), sharey=True, constrained_layout = True)
+Y = 'jan22_log_ratio_mob'
+draw_vplot(axs[0, 0], x = 'EO_local_decile', y=Y, df=df_mel, xlabel = 'Local decile of EO', ylabel = f'{lm}', title = 'Melbourne - Jan 2022', subplotlabel = 'A')
+draw_vplot(axs[0, 1], x = 'EO_local_decile', y=Y, df = df_syd, xlabel = 'Local decile of EO', ylabel = f'{lm}', title = 'Sydney - Jan 2022', subplotlabel = 'B')
+draw_vplot(axs[1, 0], x = 'ER_local_decile', y=Y, df = df_mel, xlabel = 'Local decile of ER', ylabel = f'{lm}', title = 'Melbourne - Jan 2022', subplotlabel = 'C')
+draw_vplot(axs[1, 1], x = 'ER_local_decile', y=Y, df = df_syd, xlabel = 'Local decile of ER', ylabel = f'{lm}', title = 'Sydney - Jan 2022', subplotlabel = 'D')
+handles, legend_labels = axs[1, 1].get_legend_handles_labels()
+
+axs[0, 0].set_ylim(-1.75, 1.75)
+fig.savefig('Refactored_code_plots_cov_all_SA1s/Jan22-violinplot.pdf')
+plt.close()
+# fig.legend(handles, legend_labels, loc = 'outside upper right', ncols = 3, fancybox = False)
+
 
 
 #%%
@@ -278,6 +347,54 @@ for ax in axs.flatten():
 
 plt.suptitle(f'Distribution of {lm}')
 fig.savefig('Refactored_code_plots_cov_all_SA1s/Histograms.pdf')
+
+#%% Histograms -supp - test_v and base_v
+
+fig, axs = plt.subplots(4, 2, figsize = (4*2, 8), sharey=True, sharex=True, 
+                        constrained_layout = True)
+bin_edges = np.arange(0, 6.1e5, 1000)
+A = axs[0, 0].hist(df_mel.apr20base_v, bins = bin_edges, histtype = 'step', density = True, label = r'MEL - Apr 2020')
+axs[0, 0].vlines(df_mel.apr20base_v.median(), 0, np.max(A[0]), lw = 1, ls = '--', colors = '#0072B2')
+A = axs[0, 1].hist(df_mel.apr20test_v, bins = bin_edges, histtype = 'step', density = True, label = 'MEL - Apr 2020')
+axs[0, 1].vlines(df_mel.apr20test_v.median(), 0, np.max(A[0]), lw = 1, ls = '--', colors = '#009E73')
+
+axs[0, 0].set_xlabel(r'$A_{SA1}$')
+axs[0, 1].set_xlabel(r'$B_{SA1}$')
+
+A = axs[1, 0].hist(df_syd.apr20base_v, bins = bin_edges, histtype = 'step', density = True, label = 'SYD - Apr 2020')
+axs[1, 0].vlines(df_syd.apr20base_v.median(), 0, np.max(A[0]), lw = 1, ls = '--', colors = '#0072B2')
+A = axs[1, 1].hist(df_syd.apr20test_v, bins = bin_edges, histtype = 'step', density = True, label = 'SYD - Apr 2020')
+axs[1, 1].vlines(df_syd.apr20test_v.median(), 0, np.max(A[0]), lw = 1, ls = '--', colors = '#009E73')
+
+axs[1, 0].set_xlabel(r'$A_{SA1}$')
+axs[1, 1].set_xlabel(r'$B_{SA1}$')
+
+A = axs[2, 0].hist(df_mel.jan22base_v, bins = bin_edges, histtype = 'step', density = True, label = 'MEL - Jan 2022')
+axs[2, 0].vlines(df_mel.jan22base_v.median(), 0, np.max(A[0]), lw = 1, ls = '--', colors = '#0072B2')
+A = axs[2, 1].hist(df_mel.jan22test_v, bins = bin_edges, histtype = 'step', density = True, label = 'MEL - Jan 2022')
+axs[2, 1].vlines(df_mel.jan22test_v.median(), 0, np.max(A[0]), lw = 1, ls = '--', colors = '#009E73')
+
+axs[2, 0].set_xlabel(r'$A_{SA1}$')
+axs[2, 1].set_xlabel(r'$B_{SA1}$')
+
+A = axs[3, 0].hist(df_syd.jan22base_v, bins = bin_edges, histtype = 'step', density = True, label = 'SYD - Jan 2022')
+axs[3, 0].vlines(df_syd.jan22base_v.median(), 0, np.max(A[0]), lw = 1, ls = '--', colors = '#0072B2')
+A = axs[3, 1].hist(df_syd.jan22test_v, bins = bin_edges, histtype = 'step', density = True, label = 'SYD - Jan 2022')
+axs[3, 1].vlines(df_syd.jan22test_v.median(), 0, np.max(A[0]), lw = 1, ls = '--', colors = '#009E73')
+
+axs[3, 0].set_xlabel(r'$A_{SA1}$')
+axs[3, 1].set_xlabel(r'$B_{SA1}$')
+#axs[0].set_title(f'Melbourne [N = {df_mel.shape[0]}]')
+#axs[1].set_title(f'Sydney [N = {df_syd.shape[0]}]')
+
+#plt.xlim(-6, 6)
+
+axs[0, 0].set_xlim(0, 1e5)
+for ax in axs.flatten():
+    ax.legend(fancybox = False, loc = 'upper left')
+
+plt.suptitle(r'Distribution of $A_{SA1}$ and $B_{SA1}$')
+fig.savefig('Refactored_code_plots_cov_all_SA1s/Histograms_A_B.pdf')
 
 #%% SEIFA scores and lambda mob scatter plots and correlation
 

@@ -37,7 +37,7 @@ mel_boundary = gdf[gdf.GCC_NAME16=='Greater Melbourne'].geometry.unary_union
 #%%
 f, axs = plt.subplots(1, 2, figsize = (8, 3.5), constrained_layout = True)
 gdf_vic.plot(ax = axs[0], column = 'ER_local_decile', categorical = True, cmap = cmap, legend = True, missing_kwds={
-        "color": "forestgreen",
+        "color": "lightgrey",
         "label": "NA"}, legend_kwds={"loc": "upper left", 'ncols': 1, "bbox_to_anchor": (1, 1)})
 gpd.GeoSeries(mel_boundary).boundary.plot(ax = axs[0], edgecolor = 'black', linewidth = .2)
 
@@ -57,12 +57,12 @@ for ax in axs:
     ax.set_xlim(144.25, 145.9)
     ax.set_ylim(-38.6, -37.1)
     #ax.set_facecolor('#0066CC')
-    ax.set_facecolor('skyblue')
+    ax.set_facecolor('lightskyblue')
     ax.get_xaxis().set_visible(False)
     ax.get_yaxis().set_visible(False)
     #ax.set_axis_off()
 
-plt.savefig('MEL_SA1_plot.png', dpi = 600)
+#plt.savefig('MEL_SA1_plot.png', dpi = 600)
 #%%
 gdf_nsw = gdf[gdf.STE_NAME16 == 'New South Wales']
 gdf_nsw = pd.merge(right = df_syd, left = gdf_nsw, how = 'left', right_on = 'SA1', left_on = 'SA1_MAIN16')
@@ -97,4 +97,4 @@ for ax in axs:
     ax.get_xaxis().set_visible(False)
     ax.get_yaxis().set_visible(False)
 
-plt.savefig('SYD_SA1_plot.png', dpi = 600)
+#plt.savefig('SYD_SA1_plot.png', dpi = 600)
