@@ -27,7 +27,7 @@ mono_test.py
 They make use of the following packages:
 numpy, scipy, pandas, matplotlib, seaborn, pymannkendall
 
-spatial-analysis.py performs regression with various models.
+spatial-analysis.py performs regression with various models. This file is no longer running since updates to the scipy and pySAL packages. The file also requires shape files that are too large for GitHub.
 
 The maps of Melbourne and Sydney showing the ER and EO deciles are produced using the file "Map_plots.py". It requires the geopandas package. -- These files have not been uploaded due to storage limitations
 
